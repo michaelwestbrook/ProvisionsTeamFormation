@@ -1,8 +1,11 @@
-[![LibAddonMenu-2.0r25](https://img.shields.io/badge/LibAddonMenu-2.0r25-orange.svg)](http://www.esoui.com/downloads/info7-LibAddonMenu.html) [![Esoui Prov's TF page](https://img.shields.io/badge/esoui.com-Provision%27s%20TeamFormation-green.svg)](http://www.esoui.com/downloads/info1135-ProvisionsTeamFormation.html)
+ProvisionsTeamFormation
+=============
 
-
+TeamFormation is a user Interface for The Elder Scrolls Online, designed to show the positions and health of your teammates, like a radar.
 
 *I'm happy to share my addon with you, but please **don't make a fork on esoui or curse** without my authorization.*
+
+[![LibAddonMenu-2.0r25](https://img.shields.io/badge/LibAddonMenu-2.0r25-orange.svg)](http://www.esoui.com/downloads/info7-LibAddonMenu.html) [![Esoui Prov's TF page](https://img.shields.io/badge/esoui.com-Provision%27s%20TeamFormation-green.svg)](http://www.esoui.com/downloads/info1135-ProvisionsTeamFormation.html)
 
 # Presentation
 
@@ -42,7 +45,7 @@ FR, EN, DE. (French is the main support).
 ## Quick-install guide :
 
 1. Download the archive "ProvisionsTeamFormation_*vx.x.x*.zip".
-2. Unzip the archive in ESO addons folder (delete the previous TeamFormation folder if you're updating)
+2. Unzip the archive in ESO addons folder (delete the previous TeamFormation folder if you're updating) 
 3. Launch the game, log in, and check that "**Prov's TeamFormation**" is enabled for your character and then play.
 
 If the UI does not appear it may be because you are not in a group, you need to reload your UI, or you may need restart your game.
