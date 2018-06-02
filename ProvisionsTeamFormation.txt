@@ -6,7 +6,7 @@
 ## APIVersion: 100022 100023 100024
 ## Version: 1.2.6b
 
-; LibAddonMenu-2.0 r25 : A library to aid in the creation of option panels.
+; LibAddonMenu-2.0 r26 : A library to aid in the creation of option panels.
 libs/LibStub/LibStub.lua
 libs/LibAddonMenu-2.0/LibAddonMenu-2.0.lua
 libs/LibAddonMenu-2.0/controls/panel.lua
