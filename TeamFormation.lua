@@ -11,6 +11,7 @@ end
 
 function TeamFormation_SetHidden(bool)
 	ProvTF.UI:SetHidden(GetGroupSize() == 0 or bool)
+	CALLBACK_MANAGER:FireCallbacks("TEAMFORMATION_SetHiddenCalled", bool)
 end
 
 function TeamFormation_ResetRefreshRate()

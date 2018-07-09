@@ -20,6 +20,8 @@ local function TeamFormation_MakeIcon(index)
 	ProvTF.UI.Player[index].LifeBar:SetColor(1, 0, 0)
 	ProvTF.UI.Player[index].LifeBar:SetAnchor(CENTER, ProvTF.UI.Player[index], CENTER, 0, posLifeBar)
 	ProvTF.UI.Player[index].LifeBar:SetDrawLevel(2)
+	
+	CALLBACK_MANAGER:FireCallbacks("TEAMFORMATION_MakeIcon", index)
 end
 
 --[[local function recursive(control, str)
@@ -256,6 +258,8 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 			ProvTF.UI.Player[index]:SetAlpha(defAlpha)
 		end
 	end
+	
+	CALLBACK_MANAGER:FireCallbacks("TEAMFORMATION_UpdateIcon", index, unitTag, sameZone, isDead, isInCombat)
 end
 
 local function TeamFormation_CalculateXY(x, y)
@@ -413,13 +417,13 @@ local function TeamFormation_uiLoop()
 					text = "~ " .. dist .. " Km"
 				end
 			else
-				text = zo_strformat(SI_SOCIAL_LIST_LOCATION_FORMAT, zone)
-				if myName == name then
+				text = zo_strformat("<<C:1>>", zone)
+				if myName == name and text ~= "" then
 					text = "|c00C000" .. text .. "|r"
 				end
 			end
 
-			if inTable(ABCOrder, name) ~= false and WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "Zone") then
+			if text ~= "" and inTable(ABCOrder, name) ~= false and WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "Zone") then
 				WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "Zone"):SetText(text)
 
 				ctrl_class = WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "ClassIcon")
