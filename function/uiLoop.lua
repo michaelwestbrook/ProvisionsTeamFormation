@@ -417,13 +417,13 @@ local function TeamFormation_uiLoop()
 					text = "~ " .. dist .. " Km"
 				end
 			else
-				text = zo_strformat(SI_SOCIAL_LIST_LOCATION_FORMAT, zone)
-				if myName == name then
+				text = zo_strformat("<<C:1>>", zone)
+				if myName == name and text ~= "" then
 					text = "|c00C000" .. text .. "|r"
 				end
 			end
 
-			if inTable(ABCOrder, name) ~= false and WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "Zone") then
+			if text ~= "" and inTable(ABCOrder, name) ~= false and WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "Zone") then
 				WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "Zone"):SetText(text)
 
 				ctrl_class = WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "ClassIcon")
