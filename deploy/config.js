@@ -12,7 +12,8 @@ const addonConfig = {
     'Bindings.xml',
     'header.lua',
     'TeamFormation.lua',
-    'TeamFormation.xml'
+    'TeamFormation.xml',
+    'ProvisionsTeamFormation.txt'
   ]
 };
 

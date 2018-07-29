@@ -6,7 +6,7 @@
 See '[config.js](./config.js)' for available configurations. <br />
 `modName`: Name of the mod. (duh) <br />
 `defaultBuildDir`: Destination for 'built' addon files. <br /> 
-`sourceFiles`: Provides the list of files to be deployed. New files that should be included with the addon should be added to the list. <br />
+`sourceFiles`: Provides the list of files to be deployed. New files that should be included with the addon need to be added to the list. <br />
 `esoAddonDir`: Specifies where to deploy game files. It looks to see if the `ESO_ADDON_DIR` environment variable is set.
 
 # Available commands

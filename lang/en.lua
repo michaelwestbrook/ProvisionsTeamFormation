@@ -23,7 +23,7 @@ ZO_CreateStringId("SI_TF_SETTING_WIDTH_TOOLTIP", "Change the Width of TeamFormat
 ZO_CreateStringId("SI_TF_SETTING_HEIGHT", "Height")
 ZO_CreateStringId("SI_TF_SETTING_HEIGHT_TOOLTIP", "Change the Height of TeamFormation.")
 ZO_CreateStringId("SI_TF_SETTING_LOCK", "Lock Position")
-ZO_CreateStringId("SI_TF_SETTING_LOCK_TOOLTIP", "Lock TeamFormation position, make it unmovable.")
+ZO_CreateStringId("SI_TF_SETTING_LOCK_TOOLTIP", "Lock TeamFormation position, make it immovable.")
 
 ZO_CreateStringId("SI_TF_SETTING_FOCUSOPTIONS", "TeamFormation screen")
 ZO_CreateStringId("SI_TF_SETTING_FOCUSOPTIONS_TOOLTIP", "Configure the UI of TeamFormation.")
@@ -42,7 +42,7 @@ ZO_CreateStringId("SI_TF_SETTING_SCALE_TOOLTIP", "Change the scale of pins.")
 ZO_CreateStringId("SI_TF_SETTING_LOGDIST", "Distance logarithmic")
 ZO_CreateStringId("SI_TF_SETTING_LOGDIST_TOOLTIP", "0 = Linear\nAdjusts the maximum pin distance.")
 ZO_CreateStringId("SI_TF_SETTING_CARDINAL", "Opacity of the cardinal points")
-ZO_CreateStringId("SI_TF_SETTING_CARDINAL_TOOLTIP", "0 = Hidden\Adjusts the transparency of the four cardinal points (North, South, East, & West).")
+ZO_CreateStringId("SI_TF_SETTING_CARDINAL_TOOLTIP", "0 = Hidden\nAdjusts the transparency of the four cardinal points (North, South, East, & West).")
 ZO_CreateStringId("SI_TF_SETTING_SIEGE", "Show UI when at siege weapon")
 ZO_CreateStringId("SI_TF_SETTING_SIEGE_TOOLTIP", "Show TeamFormation when you use siege weapon.")
 
@@ -53,10 +53,10 @@ ZO_CreateStringId("SI_TF_SETTING_YOURALPHA_TOOLTIP", "0 = Hidden\nChanges the tr
 ZO_CreateStringId("SI_TF_SETTING_ROLE", "Role icon")
 ZO_CreateStringId("SI_TF_SETTING_ROLE_TOOLTIP", "Show role icon instead of class icon.")
 
-ZO_CreateStringId("SI_TF_SETTING_HRADDON", "[NEW] Customize icon color with following parameters.");
+ZO_CreateStringId("SI_TF_SETTING_HRADDON", "[NEW] Customize icon color with the following settings.");
 
 ZO_CreateStringId("SI_TF_SETTING_COLOROPTIONS", "Color customization")
-ZO_CreateStringId("SI_TF_SETTING_COLOROPTIONS_TOOLTIP", "Customize the color for the icons displayed in the TeamFormation.")
+ZO_CreateStringId("SI_TF_SETTING_COLOROPTIONS_TOOLTIP", "Customize the color for the icons displayed in TeamFormation.")
 ZO_CreateStringId("SI_TF_SETTING_COLORRESET", "Reset")
 ZO_CreateStringId("SI_TF_SETTING_COLORRESET_TOOLTIP", "Reset the player and class color.")
 ZO_CreateStringId("SI_TF_SETTING_JRULES", "Based on player name")
