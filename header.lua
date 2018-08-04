@@ -7,7 +7,7 @@ ProvTF =
 	version = "1.2.7", --3 endroits
 	CPL = nil,
 	defaults =
-	{
+	{ --Don't forget header.lua
 		enabled		= true,
 
 		posx		= 0,
