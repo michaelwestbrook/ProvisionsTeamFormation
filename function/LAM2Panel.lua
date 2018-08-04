@@ -27,13 +27,13 @@ local function TeamFormation_reset()
 	ProvTF.vars.width = ProvTF.defaults.width
 	ProvTF.vars.height = ProvTF.defaults.height
 	ProvTF.vars.refreshRate = ProvTF.defaults.refreshRate
-	ProvTF.vars.circle =ProvTF.defaults.circle
+	ProvTF.vars.circle = ProvTF.defaults.circle
 	ProvTF.vars.camRotation = ProvTF.defaults.camRotation
 	ProvTF.vars.scale = ProvTF.defaults.scale
 	ProvTF.vars.logdist = ProvTF.defaults.logdist
 	ProvTF.vars.cardinal = ProvTF.defaults.cardinal
 	ProvTF.vars.siege = ProvTF.defaults.siege
-	ProvTF.vars.myAlpha =ProvTF.defaults.myAlpha
+	ProvTF.vars.myAlpha = ProvTF.defaults.myAlpha
 	ProvTF.vars.roleIcon = ProvTF.defaults.roleIcon
 	-- Don't pass default's jRules reference.
 	ProvTF.vars.jRules = {}
