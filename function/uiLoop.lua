@@ -13,15 +13,16 @@ local function TeamFormation_MakeIcon(index)
 	ProvTF.UI.Player[index].Icon:SetAnchor(CENTER, ProvTF.UI.Player[index], CENTER, 0, 0)
 	ProvTF.UI.Player[index].Icon:SetTexture("/esoui/art/icons/mapkey/mapkey_groupmember.dds")
 	ProvTF.UI.Player[index].Icon:SetDrawLevel(3)
+	
+	CALLBACK_MANAGER:FireCallbacks("TEAMFORMATION_MakeIcon", index)
 
-	if index >= 100 then return end
+
+	if index >= 90 then return end
 	ProvTF.UI.Player[index].LifeBar = WINDOW_MANAGER:CreateControl(nil, ProvTF.UI.Player[index], CT_TEXTURE)
 	ProvTF.UI.Player[index].LifeBar:SetDimensions(24, 2)
 	ProvTF.UI.Player[index].LifeBar:SetColor(1, 0, 0)
 	ProvTF.UI.Player[index].LifeBar:SetAnchor(CENTER, ProvTF.UI.Player[index], CENTER, 0, posLifeBar)
 	ProvTF.UI.Player[index].LifeBar:SetDrawLevel(2)
-	
-	CALLBACK_MANAGER:FireCallbacks("TEAMFORMATION_MakeIcon", index)
 end
 
 --[[local function recursive(control, str)
@@ -129,8 +130,47 @@ local function TeamFormation_MoveIcon(index, x, y)
 
 	if bx ~= nil then x = bx y = by end
 
-	ProvTF.UI.Player[index].data.isOut = (bx == nil)
+	ProvTF.UI.Player[index].data.isOut = not (bx == nil)
 	ProvTF.UI.Player[index]:SetAnchor(CENTER, ProvTF.UI, CENTER, x, y)
+end
+
+-- http://esodata.uesp.net/current/src/ingame/map/worldmap.lua.html
+function TeamFormation_DrawGroupPoint(id, x, y, texture)
+	if not ProvTF.UI.Player[100 + id] then
+
+		TeamFormation_MakeIcon(100 + id)
+		ProvTF.UI.Player[100 + id].Icon:SetTexture(texture)
+		local anim, timeline = CreateSimpleAnimation(ANIMATION_TEXTURE, ProvTF.UI.Player[100 + id].Icon)
+		anim:SetImageData(32, 1)
+		anim:SetFramerate(32)
+		anim:SetHandler("OnStop", function()
+			ProvTF.UI.Player[100 + id].Icon:SetTextureCoords(0, 1, 0, 1)
+			ProvTF.UI.Player[100 + id]:SetHidden(true)
+			ProvTF.UI.Player[100 + id]:SetAlpha(0)
+		end)
+
+		timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, LOOP_INDEFINITELY)
+		timeline:PlayFromStart()
+	end
+
+	if not (x == 0 and y == 0) then
+		if ProvTF.UI.Player[100 + id]:IsHidden() then
+			ProvTF.UI.Player[100 + id]:SetHidden(false)
+			ProvTF.UI.Player[100 + id]:SetAlpha(1)
+		end
+
+		local pixel = 100
+		if id ~= 0 then 
+			pixel = 32
+		end
+
+		if ProvTF.UI.Player[100 + id].data.isOut then
+			ProvTF.UI.Player[100 + id].Icon:SetDimensions(pixel / 2, pixel / 2)
+		else 
+			ProvTF.UI.Player[100 + id].Icon:SetDimensions(pixel, pixel)
+		end
+		TeamFormation_MoveIcon(100 + id, x, y)
+	end
 end
 
 local function updateIsNecessary(index, key, value)
@@ -139,6 +179,40 @@ local function updateIsNecessary(index, key, value)
 	local oldValue = ProvTF.UI.Player[index].data[key]
 	ProvTF.UI.Player[index].data[key] = value
 	return (oldValue ~= value)
+end
+
+local function TeamFormation_CalculateXY(x, y)
+	if x == nil or y == nil then
+		return nil, nil
+	end
+	local fX, fY, fHeading = GetMapPlayerPosition("player")
+	local gameScale = 100 * ProvTF.vars.scale / TeamFormation_getDivisor()
+
+	x = (x - fX)
+	y = (y - fY)
+
+	--[[ debug
+	if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and myName ~= GetUnitName(unitTag) then
+		local dist = math.sqrt(x * x + y * y) * 800 / TeamFormation_getDivisor() -- meter
+		local dist = zo_round(dist * 100) / 100
+		ProvTF.UI.LblMyPosition:SetText("Distance avec " .. i .. " : " .. dist .. " mètres ")
+	end
+	--]]
+
+	local head = (ProvTF.vars.camRotation and GetPlayerCameraHeading() or fHeading)
+	local vx = (math.cos(head) * x) - (math.sin(head) * y)
+	local vy = (math.sin(head) * x) + (math.cos(head) * y)
+
+	if ProvTF.vars.logdist ~= 0 then
+		local denominator = math.log(1000)
+		if vx ~= 0 then vx = vx + (vx * math.log(math.abs(vx)) / denominator * ProvTF.vars.logdist) end
+		if vy ~= 0 then vy = vy + (vy * math.log(math.abs(vy)) / denominator * ProvTF.vars.logdist) end
+	end
+
+	x = zo_round(vx * gameScale)
+	y = zo_round(vy * gameScale)
+
+	return x, y
 end
 
 local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
@@ -253,47 +327,20 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 			ProvTF.UI.Player[index]:SetAlpha(myAlpha)
 		end
 	else
-		local defAlpha = sameZone and (ProvTF.UI.Player[index].data.isOut and 1 or 0.4) or 0.2
+		local defAlpha = sameZone and ((not ProvTF.UI.Player[index].data.isOut) and 1 or 0.4) or 0.2
 		if updateIsNecessary(index, "defAlpha", defAlpha) then
 			ProvTF.UI.Player[index]:SetAlpha(defAlpha)
 		end
 	end
+
+	-- Set Player's Ping
+	x, y = GetMapPing(unitTag)
+	if not (x == 0 and y == 0) then
+		x, y = TeamFormation_CalculateXY(x, y)
+		TeamFormation_DrawGroupPoint(index, x, y, "/esoui/art/mappins/mapping.dds")
+	end
 	
 	CALLBACK_MANAGER:FireCallbacks("TEAMFORMATION_UpdateIcon", index, unitTag, sameZone, isDead, isInCombat)
-end
-
-local function TeamFormation_CalculateXY(x, y)
-	if x == nil or y == nil then
-		return nil, nil
-	end
-	local fX, fY, fHeading = GetMapPlayerPosition("player")
-	local gameScale = 100 * ProvTF.vars.scale / TeamFormation_getDivisor()
-
-	x = (x - fX)
-	y = (y - fY)
-
-	--[[ debug
-	if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and myName ~= GetUnitName(unitTag) then
-		local dist = math.sqrt(x * x + y * y) * 800 / TeamFormation_getDivisor() -- meter
-		local dist = zo_round(dist * 100) / 100
-		ProvTF.UI.LblMyPosition:SetText("Distance avec " .. i .. " : " .. dist .. " mètres ")
-	end
-	--]]
-
-	local head = (ProvTF.vars.camRotation and GetPlayerCameraHeading() or fHeading)
-	local vx = (math.cos(head) * x) - (math.sin(head) * y)
-	local vy = (math.sin(head) * x) + (math.cos(head) * y)
-
-	if ProvTF.vars.logdist ~= 0 then
-		local denominator = math.log(1000)
-		if vx ~= 0 then vx = vx + (vx * math.log(math.abs(vx)) / denominator * ProvTF.vars.logdist) end
-		if vy ~= 0 then vy = vy + (vy * math.log(math.abs(vy)) / denominator * ProvTF.vars.logdist) end
-	end
-
-	x = zo_round(vx * gameScale)
-	y = zo_round(vy * gameScale)
-
-	return x, y
 end
 
 local function TeamFormation_GetOrder()
@@ -447,17 +494,6 @@ local function TeamFormation_uiLoop()
 		ProvTF.UI.Player[myIndex].Icon:SetTextureRotation(-myCamHeading)
 	end
 
-	TeamFormation_MakeIcon(100)
-	x, y = GetMapPlayerWaypoint()
-	if x ~= 0 and y ~= 0 then
-		x, y = TeamFormation_CalculateXY(x, y)
-		TeamFormation_MoveIcon(100, x, y)
-		ProvTF.UI.Player[100].Icon:SetTexture("/esoui/art/compass/compass_waypoint.dds")
-		ProvTF.UI.Player[100]:SetHidden(false)
-	else
-		ProvTF.UI.Player[100]:SetHidden(true)
-	end
-
 	local cx, cy, ca
 
 	local mx = (ProvTF.vars.width / 2)
@@ -476,23 +512,22 @@ local function TeamFormation_uiLoop()
 		ProvTF.UI.Cardinal[i]:SetAlpha(ProvTF.vars.cardinal)
 	end
 
-	--[[TeamFormation_MakeIcon(101)
-	x = nil
-	x, y = TeamFormation_CalculateXY(GetMapRallyPoint())
-	ProvTF.UI.Player[101]:SetHidden(x == nil)
-	if x ~= nil and ProvTF.numUpdate == 1 then
-		TeamFormation_MoveIcon(101, x, y)
-		ProvTF.UI.Player[101].Icon:SetTexture("/esoui/art/mappins/maprallypoint.dds")
-		ProvTF.UI.Player[101].Icon:SetDimensions(128, 128)
+	TeamFormation_MakeIcon(99)
+	x, y = GetMapPlayerWaypoint()
+	if not (x == 0 and y == 0) then
+		x, y = TeamFormation_CalculateXY(x, y)
+		TeamFormation_MoveIcon(99, x, y)
+		ProvTF.UI.Player[99].Icon:SetTexture("/esoui/art/mappins/ui_worldmap_pin_customdestination.dds")
+		ProvTF.UI.Player[99]:SetHidden(false)
+	else
+		ProvTF.UI.Player[99]:SetHidden(true)
+	end
 
-		local anim, timeline = CreateSimpleAnimation(ANIMATION_TEXTURE, ProvTF.UI.Player[101].Icon)
-		anim:SetImageData(32, 1)
-		anim:SetFramerate(32)
-		anim:SetHandler("OnStop", function() ProvTF.UI.Player[101].Icon:SetTextureCoords(0, 1, 0, 1) end)
-
-		timeline:SetPlaybackType(ANIMATION_PLAYBACK_LOOP, 10)
-		timeline:PlayFromStart()
-	end]]
+	x, y = GetMapRallyPoint()
+	if not (x == 0 and y == 0) then 
+		x, y = TeamFormation_CalculateXY(x, y)
+		TeamFormation_DrawGroupPoint(0, x, y, "/esoui/art/mappins/maprallypoint.dds")
+	end
 
 	ProvTF.lastSize = groupSize
 end

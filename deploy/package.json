@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "grunt clean:build && grunt copy:build",
-    "deploy": "grunt clean:deploy && grunt copy:deploy"
+    "deploy": "grunt clean:deploy && grunt copy:deploy",
+    "build-deploy": "yarn run build && yarn run deploy"
   },
   "devDependencies": {
     "grunt": "^1.0.3",
