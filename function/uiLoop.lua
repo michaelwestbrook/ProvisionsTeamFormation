@@ -192,7 +192,7 @@ local function TeamFormation_CalculateXY(x, y)
 	y = (y - fY)
 
 	--[[ debug
-	if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and myName ~= GetUnitName(unitTag) then
+	if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and not AreUnitsEqual("player", unitTag) then
 		local dist = math.sqrt(x * x + y * y) * 800 / TeamFormation_getDivisor() -- meter
 		local dist = zo_round(dist * 100) / 100
 		ProvTF.UI.LblMyPosition:SetText("Distance avec " .. i .. " : " .. dist .. " mètres ")
@@ -229,7 +229,7 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 	local updateIsNecessaryOnSameZone = updateIsNecessary(index, "sameZone", sameZone)
 	local isGroupLeader = IsUnitGroupLeader(unitTag)
 	local updateIsNecessaryOnGrLeader = updateIsNecessary(index, "isGroupLeader", isGroupLeader)
-	local isMe = (name == GetUnitName("player"))
+	local isMe = AreUnitsEqual("player", unitTag)
 	local r, g, b = unpack(ProvTF.vars.jRules[name] or {1, 1, 1})
 
 	-- Set Icon
@@ -308,7 +308,7 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 
 	-- Set LifeBar Color
 	if updateIsNecessary(index, "isInCombat", isInCombat) then
-		if isInCombat and name ~= GetUnitName("player") then
+		if isInCombat and not AreUnitsEqual("player", unitTag) then
 			ProvTF.UI.Player[index].LifeBar:SetColor(1, 0, 0)
 		else
 			ProvTF.UI.Player[index].LifeBar:SetColor(.72, .24, .24)
@@ -359,7 +359,7 @@ local function TeamFormation_GetOrder()
 	return order
 end
 
-ProvTF.lastSize = nil
+ProvTF.lastSize = 0
 ProvTF.numUpdate = 0
 local function inTable(tbl, item)
     for key, value in pairs(tbl) do
@@ -405,11 +405,10 @@ local function TeamFormation_uiLoop()
 
 	local ABCOrder = TeamFormation_GetOrder()
 
-	local myName = GetUnitName("player")
 	local fX, fY, fHeading = GetMapPlayerPosition("player")
 	local myIndex = 1
 
-	local unitTag, name, x, y, heading, xi, yi, isOnline
+	local unitTag, name, x, y, heading, xi, yi, isOnline, isMe
 	local zone, sameZone, dist, text, ctrl_class
 
 	for i = 1, groupSize do
@@ -418,8 +417,9 @@ local function TeamFormation_uiLoop()
 		x, y, heading = GetMapPlayerPosition(unitTag)
 		zone = GetUnitZone(unitTag)
 		isOnline = IsUnitOnline(unitTag) and not (name == "" or (x == 0 and y == 0)) -- last condition prevent issue
+		isMe = AreUnitsEqual("player", unitTag)
 
-		if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and myName ~= name then
+		if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and not isMe then
 			x = ProvTF.debug.pos.x
 			y = ProvTF.debug.pos.y
 			zone = ProvTF.debug.pos.zone
@@ -427,7 +427,7 @@ local function TeamFormation_uiLoop()
 			isOnline = true
 
 			--[[ debug
-			if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and myName ~= GetUnitName(unitTag) then
+			if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and not isMe then
 				local fX, fY, fHeading = GetMapPlayerPosition("player")
 				x = (x - fX)
 				y = (y - fY)
@@ -451,7 +451,7 @@ local function TeamFormation_uiLoop()
 			TeamFormation_MoveIcon(i, xi, yi)
 			TeamFormation_UpdateIcon(i, sameZone, IsUnitDead(unitTag), IsUnitInCombat(unitTag))
 
-			if sameZone and myName ~= name then
+			if sameZone and not isMe then
 				x = (x - fX)
 				y = (y - fY)
 				dist = math.sqrt(x * x + y * y) * 800 / TeamFormation_getDivisor() -- meter
@@ -465,7 +465,7 @@ local function TeamFormation_uiLoop()
 				end
 			else
 				text = zo_strformat("<<C:1>>", zone)
-				if myName == name and text ~= "" then
+				if isMe and text ~= "" then
 					text = "|c00C000" .. text .. "|r"
 				end
 			end
@@ -482,7 +482,7 @@ local function TeamFormation_uiLoop()
 			ProvTF.UI.Player[i]:SetHidden(not isOnline)
 		end
 
-		if myName == name then
+		if isMe then
 			myIndex = i
 		end
 	end
