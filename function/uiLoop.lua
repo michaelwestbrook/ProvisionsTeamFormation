@@ -6,16 +6,16 @@ local function TeamFormation_MakeIcon(index)
 	ProvTF.UI.Player[index] = CreateControl(nil, ProvTF.UI, CT_TOPLEVELCONTROL)
 	ProvTF.UI.Player[index]:SetDrawLevel(10)
 	ProvTF.UI.Player[index]:SetHidden(true)
+	ProvTF.UI.Player[index]:SetAlpha(0)
 	ProvTF.UI.Player[index].data = {}
 
 	ProvTF.UI.Player[index].Icon = WINDOW_MANAGER:CreateControl(nil, ProvTF.UI.Player[index], CT_TEXTURE)
 	ProvTF.UI.Player[index].Icon:SetDimensions(24, 24)
 	ProvTF.UI.Player[index].Icon:SetAnchor(CENTER, ProvTF.UI.Player[index], CENTER, 0, 0)
-	ProvTF.UI.Player[index].Icon:SetTexture("/esoui/art/icons/mapkey/mapkey_groupmember.dds")
+	ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/Icons/mapkey/mapkey_groupmember.dds")
 	ProvTF.UI.Player[index].Icon:SetDrawLevel(3)
 	
 	CALLBACK_MANAGER:FireCallbacks("TEAMFORMATION_MakeIcon", index)
-
 
 	if index >= 90 then return end
 	ProvTF.UI.Player[index].LifeBar = WINDOW_MANAGER:CreateControl(nil, ProvTF.UI.Player[index], CT_TEXTURE)
@@ -116,7 +116,7 @@ local function TeamFormation_getDivisor() -- RangeReticle function (Author: Adei
 end
 
 local function TeamFormation_MoveIcon(index, x, y)
-	local unitTag = (index ~= 0) and ("group" .. index) or "player"
+	local unitTag = ZO_Group_GetUnitTagForGroupIndex(index)
 
 	local mx = (ProvTF.vars.width / 2)
 	local my = (ProvTF.vars.height / 2)
@@ -192,7 +192,7 @@ local function TeamFormation_CalculateXY(x, y)
 	y = (y - fY)
 
 	--[[ debug
-	if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and myName ~= GetUnitName(unitTag) then
+	if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and not AreUnitsEqual("player", unitTag) then
 		local dist = math.sqrt(x * x + y * y) * 800 / TeamFormation_getDivisor() -- meter
 		local dist = zo_round(dist * 100) / 100
 		ProvTF.UI.LblMyPosition:SetText("Distance avec " .. i .. " : " .. dist .. " mètres ")
@@ -216,7 +216,7 @@ local function TeamFormation_CalculateXY(x, y)
 end
 
 local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
-	local unitTag = (index ~= 0) and ("group" .. index) or "player"
+	local unitTag = ZO_Group_GetUnitTagForGroupIndex(index)
 	local name = GetUnitName(unitTag)
 	local health, maxHealth, _ = GetUnitPower(unitTag, POWERTYPE_HEALTH)
 	local sizeHealthBar = zo_round(24 * health / maxHealth)
@@ -229,19 +229,30 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 	local updateIsNecessaryOnSameZone = updateIsNecessary(index, "sameZone", sameZone)
 	local isGroupLeader = IsUnitGroupLeader(unitTag)
 	local updateIsNecessaryOnGrLeader = updateIsNecessary(index, "isGroupLeader", isGroupLeader)
-	local isMe = (name == GetUnitName("player"))
+	local updateIsNecessaryOnBreadcrumb = updateIsNecessary(index, "isBreadcrumb", ProvTF.UI.Player[index].data.isBreadcrumb)
+	local updateIsNecessaryOnSSOnCurrentMap = updateIsNecessary(index, "shouldShowOnCurrentMap", ProvTF.UI.Player[index].data.shouldShowOnCurrentMap)
+	local isMe = AreUnitsEqual("player", unitTag)
 	local r, g, b = unpack(ProvTF.vars.jRules[name] or {1, 1, 1})
 
 	-- Set Icon
-	if updateIsNecessary(index, "name", name) or updateIsNecessaryOnGrLeader or updateIsNecessaryOnDead then
+	if updateIsNecessary(index, "name", name) or updateIsNecessaryOnGrLeader or updateIsNecessaryOnDead or updateIsNecessaryOnBreadcrumb or updateIsNecessaryOnSSOnCurrentMap then
 		local class = tostring(CLASS_ID2NAME[GetUnitClassId(unitTag)])
 		ProvTF.UI.Player[index].Icon:SetColor(r, g, b, 1)
 		ProvTF.UI.Player[index].Icon:SetTextureRotation(0)
 		ProvTF.UI.Player[index].Icon:SetDimensions(24, 24)
 		ProvTF.UI.Player[index]:SetHidden(false)
+		ProvTF.UI.Player[index]:SetAlpha(1)
 
 		if isMe then
-			ProvTF.UI.Player[index].Icon:SetTexture("/esoui/art/icons/mapkey/mapkey_player.dds")
+			ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/Icons/mapkey/mapkey_player.dds")
+		elseif ProvTF.UI.Player[index].data.isBreadcrumb then
+			if isGroupLeader then
+				ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/Compass/groupLeader_door.dds")
+			else
+				ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/Compass/groupMember_door.dds")
+			end
+		elseif not ProvTF.UI.Player[index].data.shouldShowOnCurrentMap then
+			ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/LFG/LFG_tabicon_grouptools_disabled.dds")
 		elseif isDead then
 			local iconPath = "in"
 
@@ -251,7 +262,7 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 				ProvTF.UI.Player[index].Icon:SetColor(1, 0, 0)
 			end
 
-			ProvTF.UI.Player[index].Icon:SetTexture("/esoui/art/icons/poi/poi_groupboss_" .. iconPath .. "complete.dds")
+			ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/Icons/poi/poi_groupboss_" .. iconPath .. "complete.dds")
 			if isGroupLeader then
 				ProvTF.UI.Player[index].Icon:SetDimensions(48, 48)
 			else
@@ -265,15 +276,15 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 			elseif isHealer then
 				role = "healer"
 			end
-			ProvTF.UI.Player[index].Icon:SetTexture("/esoui/art/lfg/lfg_" .. role .. "_up.dds")
+			ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/LFG/LFG_" .. role .. "_up.dds")
 			ProvTF.UI.Player[index].Icon:SetDimensions(32, 32)
 		elseif isGroupLeader then
-			ProvTF.UI.Player[index].Icon:SetTexture("EsoUI/Art/Compass/groupLeader.dds")
+			ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/Compass/groupLeader.dds")
 			ProvTF.UI.Player[index].Icon:SetDimensions(32, 32)
 		elseif class ~= "nil" then
-			ProvTF.UI.Player[index].Icon:SetTexture("/esoui/art/icons/class/class_" .. class .. ".dds")
+			ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/Icons/class/class_" .. class .. ".dds")
 		else
-			ProvTF.UI.Player[index].Icon:SetTexture("/esoui/art/icons/mapkey/mapkey_groupmember.dds")
+			ProvTF.UI.Player[index].Icon:SetTexture("/EsoUI/Art/Icons/mapkey/mapkey_groupmember.dds")
 			ProvTF.UI.Player[index].Icon:SetDimensions(16, 16)
 			ProvTF.UI.Player[index].data.name = nil
 			--d("[TF] bug n69: " .. name .. " " .. unitTag)
@@ -308,7 +319,7 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 
 	-- Set LifeBar Color
 	if updateIsNecessary(index, "isInCombat", isInCombat) then
-		if isInCombat and name ~= GetUnitName("player") then
+		if isInCombat and not AreUnitsEqual("player", unitTag) then
 			ProvTF.UI.Player[index].LifeBar:SetColor(1, 0, 0)
 		else
 			ProvTF.UI.Player[index].LifeBar:SetColor(.72, .24, .24)
@@ -325,11 +336,13 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 				ProvTF.UI.Player[index]:SetHidden(false)
 			end
 			ProvTF.UI.Player[index]:SetAlpha(myAlpha)
+			ProvTF.UI.Player[index].data.alpha = myAlpha
 		end
 	else
 		local defAlpha = sameZone and ((not ProvTF.UI.Player[index].data.isOut) and 1 or 0.4) or 0.2
 		if updateIsNecessary(index, "defAlpha", defAlpha) then
 			ProvTF.UI.Player[index]:SetAlpha(defAlpha)
+			ProvTF.UI.Player[index].data.alpha = defAlpha
 		end
 	end
 
@@ -337,7 +350,7 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 	x, y = GetMapPing(unitTag)
 	if not (x == 0 and y == 0) then
 		x, y = TeamFormation_CalculateXY(x, y)
-		TeamFormation_DrawGroupPoint(index, x, y, "/esoui/art/mappins/mapping.dds")
+		TeamFormation_DrawGroupPoint(index, x, y, "/EsoUI/Art/mappins/mapping.dds")
 	end
 	
 	CALLBACK_MANAGER:FireCallbacks("TEAMFORMATION_UpdateIcon", index, unitTag, sameZone, isDead, isInCombat)
@@ -346,11 +359,10 @@ end
 local function TeamFormation_GetOrder()
 	local order = {}
 	local numChildren = WINDOW_MANAGER:GetControlByName("ZO_GroupListListContents"):GetNumChildren()
-	local str, text
 	for i = 1, numChildren do
 		if WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. i .. "CharacterName") then
-			text = WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. i .. "CharacterName"):GetText()
-			str = string.match(text, "^[0-9]+\. (.+)$")
+			local text = WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. i .. "CharacterName"):GetText()
+			local str = string.match(text, "^[0-9]+\. (.+)$")
 			if str and str ~= "" then
 				order[i] = str
 			end
@@ -359,13 +371,13 @@ local function TeamFormation_GetOrder()
 	return order
 end
 
-ProvTF.lastSize = nil
+--ProvTF.nbPlayerVisible = 0
 ProvTF.numUpdate = 0
 local function inTable(tbl, item)
-    for key, value in pairs(tbl) do
-        if value == item then return key end
-    end
-    return false
+	for key, value in pairs(tbl) do
+		if value == item then return key end
+	end
+	return false
 end
 
 local function TeamFormation_uiLoop()
@@ -373,8 +385,6 @@ local function TeamFormation_uiLoop()
 		TeamFormation_SetHidden(true)
 		return
 	end
-
-	local groupSize = GetGroupSize()
 
 	ProvTF.numUpdate = ProvTF.numUpdate + 1
 
@@ -389,45 +399,56 @@ local function TeamFormation_uiLoop()
 		end
 	end
 
-	if ProvTF.lastSize and groupSize < ProvTF.lastSize then
-		for i = math.max(1, groupSize), ProvTF.lastSize do
-			ProvTF.UI.Player[i]:SetHidden(true)
-		end
-	end
-
-	if groupSize == 0 then
-		ProvTF.lastSize = 0
+	if GetGroupSize() == 0 then
 		TeamFormation_SetHidden(true)
 		return
-	elseif ProvTF.lastSize == 0 then
+	else
 		TeamFormation_SetHidden(false)
 	end
 
 	local ABCOrder = TeamFormation_GetOrder()
 
-	local myName = GetUnitName("player")
 	local fX, fY, fHeading = GetMapPlayerPosition("player")
 	local myIndex = 1
 
-	local unitTag, name, x, y, heading, xi, yi, isOnline
-	local zone, sameZone, dist, text, ctrl_class
+	for i = 1, GROUP_SIZE_MAX do
+		local unitTag = ZO_Group_GetUnitTagForGroupIndex(i)
+		local name = GetUnitName(unitTag)
+		local x, y, heading = GetMapPlayerPosition(unitTag)
+		local zone = GetUnitZone(unitTag)
+		local isMe = AreUnitsEqual("player", unitTag)
+		local isOnline = DoesUnitExist(unitTag) and IsUnitOnline(unitTag) and not (name == "" or (x == 0 and y == 0)) -- last condition prevent issue
+		local isBreadcrumb = false
+		local shouldShowOnCurrentMap = false
 
-	for i = 1, groupSize do
-		unitTag = (i ~= 0) and ("group" .. i) or "player"
-		name = GetUnitName(unitTag)
-		x, y, heading = GetMapPlayerPosition(unitTag)
-		zone = GetUnitZone(unitTag)
-		isOnline = IsUnitOnline(unitTag) and not (name == "" or (x == 0 and y == 0)) -- last condition prevent issue
+		if isMe then
+			myIndex = i
+		end
 
-		if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and myName ~= name then
+		if DoesCurrentMapMatchMapForPlayerLocation() then
+			if IsGroupMemberInSameInstanceAsPlayer(unitTag) then
+				shouldShowOnCurrentMap = true
+			else
+				-- Show if in a house and house we are in doesn't have it's own (dungeon) map
+				if GetCurrentZoneHouseId() and GetMapContentType() ~= MAP_CONTENT_DUNGEON then
+					shouldShowOnCurrentMap = true
+				end
+			end
+		else
+			shouldShowOnCurrentMap = true
+		end
+
+		if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and not isMe then
 			x = ProvTF.debug.pos.x
 			y = ProvTF.debug.pos.y
 			zone = ProvTF.debug.pos.zone
 			heading = ProvTF.debug.pos.heading
 			isOnline = true
+			isBreadcrumb = false
+			shouldShowOnCurrentMap = true
 
 			--[[ debug
-			if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and myName ~= GetUnitName(unitTag) then
+			if ProvTF.debug.enabled and ProvTF.debug.pos.num == i and ProvTF.debug.pos.x ~= nil and not isMe then
 				local fX, fY, fHeading = GetMapPlayerPosition("player")
 				x = (x - fX)
 				y = (y - fY)
@@ -438,23 +459,33 @@ local function TeamFormation_uiLoop()
 			--]]
 		end
 
-		TeamFormation_MakeIcon(i)
 
-		if isOnline then
-			xi, yi = TeamFormation_CalculateXY(x, y)
-			sameZone = GetUnitZone("player") == zone
+		if isOnline and not ProvTF.LOL then
+			local xi, yi = TeamFormation_CalculateXY(x, y)
+			local sameZone = GetUnitZone("player") == zone
+
+			TeamFormation_MakeIcon(i)
 
 			if ProvTF.UI.Player[i].data.name ~= name then
 				ProvTF.UI.Player[i].data = {}
 			end
 
+			if not isMe then
+				ProvTF.UI.Player[i].data.isBreadcrumb = IsUnitWorldMapPositionBreadcrumbed(unitTag)
+				ProvTF.UI.Player[i].data.shouldShowOnCurrentMap = shouldShowOnCurrentMap
+			end
+
+			ProvTF.UI.Player[i]:SetHidden(false)
+			ProvTF.UI.Player[i]:SetAlpha(ProvTF.UI.Player[i].data.alpha or 1)
 			TeamFormation_MoveIcon(i, xi, yi)
 			TeamFormation_UpdateIcon(i, sameZone, IsUnitDead(unitTag), IsUnitInCombat(unitTag))
 
-			if sameZone and myName ~= name then
+			local text = ""
+
+			if sameZone and not isMe then
 				x = (x - fX)
 				y = (y - fY)
-				dist = math.sqrt(x * x + y * y) * 800 / TeamFormation_getDivisor() -- meter
+				local dist = math.sqrt(x * x + y * y) * 800 / TeamFormation_getDivisor() -- meter
 
 				if dist < 1000 then
 					dist = zo_round(dist)
@@ -465,7 +496,7 @@ local function TeamFormation_uiLoop()
 				end
 			else
 				text = zo_strformat("<<C:1>>", zone)
-				if myName == name and text ~= "" then
+				if isMe and text ~= "" then
 					text = "|c00C000" .. text .. "|r"
 				end
 			end
@@ -473,17 +504,12 @@ local function TeamFormation_uiLoop()
 			if text ~= "" and inTable(ABCOrder, name) ~= false and WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "Zone") then
 				WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "Zone"):SetText(text)
 
-				ctrl_class = WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "ClassIcon")
+				local ctrl_class = WINDOW_MANAGER:GetControlByName("ZO_GroupListList1Row" .. inTable(ABCOrder, name) .. "ClassIcon")
 				ctrl_class:SetColor(unpack(ProvTF.vars.jRules[name] or {1, 1, 1}))
 			end
-		end
-
-		if updateIsNecessary(i, "isOnline", isOnline) then
-			ProvTF.UI.Player[i]:SetHidden(not isOnline)
-		end
-
-		if myName == name then
-			myIndex = i
+		elseif ProvTF.UI.Player[i] then
+			ProvTF.UI.Player[i]:SetHidden(true)
+			ProvTF.UI.Player[i]:SetAlpha(0)
 		end
 	end
 
@@ -517,19 +543,19 @@ local function TeamFormation_uiLoop()
 	if not (x == 0 and y == 0) then
 		x, y = TeamFormation_CalculateXY(x, y)
 		TeamFormation_MoveIcon(99, x, y)
-		ProvTF.UI.Player[99].Icon:SetTexture("/esoui/art/mappins/ui_worldmap_pin_customdestination.dds")
+		ProvTF.UI.Player[99].Icon:SetTexture("/EsoUI/Art/mappins/ui_worldmap_pin_customdestination.dds")
 		ProvTF.UI.Player[99]:SetHidden(false)
+		ProvTF.UI.Player[99]:SetAlpha(1)
 	else
 		ProvTF.UI.Player[99]:SetHidden(true)
+		ProvTF.UI.Player[99]:SetAlpha(0)
 	end
 
 	x, y = GetMapRallyPoint()
 	if not (x == 0 and y == 0) then 
 		x, y = TeamFormation_CalculateXY(x, y)
-		TeamFormation_DrawGroupPoint(0, x, y, "/esoui/art/mappins/maprallypoint.dds")
+		TeamFormation_DrawGroupPoint(0, x, y, "/EsoUI/Art/mappins/maprallypoint.dds")
 	end
-
-	ProvTF.lastSize = groupSize
 end
 
 function TeamFormation_OnUpdate()
