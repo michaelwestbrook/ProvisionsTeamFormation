@@ -359,7 +359,7 @@ local function TeamFormation_GetOrder()
 	return order
 end
 
-ProvTF.lastSize = 0
+ProvTF.lastSize = nil
 ProvTF.numUpdate = 0
 local function inTable(tbl, item)
     for key, value in pairs(tbl) do
