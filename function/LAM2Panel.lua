@@ -470,11 +470,10 @@ function TeamFormation_createLAM2Panel()
 	}
 
 	SLASH_COMMANDS["/tfrainbow"] = function()
-		local r, g, b, pseudo
 		for i = 1, 24 do
-			pseudo = GetUnitName("group" .. i)
+			local pseudo = GetUnitName("group" .. i)
 			if pseudo ~= "" then
-				r, g, b = HSV2RGB(0.1 * ((i - 1) % 10), 0.5, 1.0)
+				local r, g, b = HSV2RGB(0.1 * ((i - 1) % 10), 0.5, 1.0)
 				ProvTF.vars.jRules[pseudo] = { r, g, b }
 				d(colorizePseudo({ r, g, b }, pseudo))
 			end
