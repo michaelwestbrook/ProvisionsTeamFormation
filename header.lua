@@ -4,7 +4,7 @@ ProvTF =
 	namePublic = "Prov's TeamFormation",
 	nameColor = "|cFF9999Team|cFF0000Formation|r",
 	author = "|c00C000Provision|r",
-	version = "1.2.9", --3 endroits
+	version = "1.2.9b", --3 endroits
 	CPL = nil,
 	defaults =
 	{ --Don't forget header.lua

@@ -215,6 +215,11 @@ local function TeamFormation_CalculateXY(x, y)
 	return x, y
 end
 
+function GetGroupMemberRolesFix(unitTag)
+    local id = GetGroupMemberSelectedRole(unitTag)
+    return (id == LFG_ROLE_DPS), (id == LFG_ROLE_HEAL), (id == LFG_ROLE_TANK)
+end
+
 local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 	local unitTag = ZO_Group_GetUnitTagForGroupIndex(index)
 	local name = GetUnitName(unitTag)
@@ -269,7 +274,7 @@ local function TeamFormation_UpdateIcon(index, sameZone, isDead, isInCombat)
 				ProvTF.UI.Player[index].Icon:SetDimensions(32, 32)
 			end
 		elseif ProvTF.vars.roleIcon then
-			local isDps, isHealer, isTank = GetGroupMemberRoles(unitTag)
+			local isDps, isHealer, isTank = GetGroupMemberRolesFix(unitTag)
 			local role = "dps"
 			if isTank then
 				role = "tank"
