@@ -1,10 +1,10 @@
-## Title: |c00C000Prov|r's |cFF9999Team|cFF0000Formation|r 1.2.9
+## Title: |c00C000Prov|r's TeamFormation 1.2.9b
 ## Description: Affiche et gère la formation du groupe. (Show and Manage group formation)
 ## Author: |c00C000Provision|r
 ## SavedVariables: ProvTFSV
 ## OptionalDependsOn: LibStub LibAddonMenu-2.0
-## APIVersion: 100022 100023 100024
-## Version: 1.2.9
+## APIVersion: 100024
+## Version: 1.2.9b
 
 ; LibAddonMenu-2.0 r26 : A library to aid in the creation of option panels.
 libs/LibStub/LibStub.lua
