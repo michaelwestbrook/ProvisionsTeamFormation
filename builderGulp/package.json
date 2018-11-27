@@ -1,7 +1,7 @@
 {
-  "name": "provtf-buildergulp",
+  "name": "eso-buildergulp",
   "version": "1.0.0",
-  "description": "Build and deploy Provision's TeamFormation",
+  "description": "Build and deploy for eso' Addons",
   "main": "Gulpfile.js",
   "scripts": {
     "test": "gulp test"
