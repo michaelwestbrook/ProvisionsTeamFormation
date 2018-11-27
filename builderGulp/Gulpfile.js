@@ -77,7 +77,6 @@ function watchDeploy() {
 			.pipe(gulp.dest(deployFolderPATH));
 	});
 }
-gulp.task("watch-deploy", gulp.series("deploy", watchDeploy));
 
 gulp.task("clean", cleanBuild);
 gulp.task("clean-deploy", cleanDeploy);
