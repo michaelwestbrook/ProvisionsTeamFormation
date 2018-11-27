@@ -9,7 +9,7 @@ const buildFolderPATH = path.resolve(__dirname, addonConfig.buildFolder),
 	  deployFolderPATH = path.resolve(addonConfig.esoAddonDir, addonConfig.modName),
 	  archiveFolderPATH = path.resolve(__dirname, addonConfig.archiveFolder),
 	  sourceFiles = addonConfig.sourceFiles.map((str) => str.replace(/\//g, path.sep)),
-	  outputFolderBuild = path.resolve(buildFolderPATH, addonConfig.modName);
+	  outputBuildFolder = path.resolve(buildFolderPATH, addonConfig.modName);
 
 process.chdir(path.resolve(__dirname, "../"));
 
@@ -23,16 +23,16 @@ const cleanDeploy = () => del([
 
 const generateBuild = () => 
 	gulp.src(sourceFiles)
-		.pipe(gulp.dest(outputFolderBuild))
+		.pipe(gulp.dest(outputBuildFolder))
 ;
 
 const generateDeploy = () => 
-	gulp.src(outputFolderBuild + path.sep + "**")
+	gulp.src(outputBuildFolder + path.sep + "**")
 		.pipe(gulp.dest(deployFolderPATH))
 ;
 
-const generateArchive = (buildFolderPATH) =>  
-	gulp.src(outputFolderBuild + path.sep + "**")
+const generateArchive = () =>  
+	gulp.src(buildFolderPATH + path.sep + "**")
 		.pipe(zip(`${addonConfig.modName}_${getVersion()}.zip`))
 		.pipe(gulp.dest(archiveFolderPATH))
 ;
