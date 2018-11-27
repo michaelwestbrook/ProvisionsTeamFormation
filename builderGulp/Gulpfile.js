@@ -1,6 +1,8 @@
 const path = require('path'),
 	  gulp = require('gulp'),
 	  zip = require('gulp-zip'),
+	  log = require('fancy-log'),
+	  color = require('ansi-colors'),
 	  del = require('del'),
 	  fs = require('fs'),
 	  addonConfig = require('./config.js');
@@ -37,6 +39,10 @@ const generateArchive = () =>
 		.pipe(gulp.dest(archiveFolderPATH))
 ;
 
+function getFileContent(filename) {
+	return fs.readFileSync(filename).toString();
+}
+
 function getVersion() {
 	const txtFile = getFileContent(addonConfig.modName + ".txt");
 
@@ -61,9 +67,17 @@ function getVersion() {
 	return version;
 }
 
-function getFileContent(filename) {
-	return fs.readFileSync(filename).toString();
+function watchDeploy() {
+	const watcher = gulp.watch(sourceFiles);
+
+	watcher.on("change", function(path, stats) {
+		log(`Change detected '${color.cyan(path)}'`);
+		gulp.src(path)
+			.pipe(gulp.dest(outputBuildFolder))
+			.pipe(gulp.dest(deployFolderPATH));
+	});
 }
+gulp.task("watch-deploy", gulp.series("deploy", watchDeploy));
 
 gulp.task("clean", cleanBuild);
 gulp.task("clean-deploy", cleanDeploy);
@@ -71,3 +85,5 @@ gulp.task("clean-deploy", cleanDeploy);
 gulp.task("build", gulp.series(cleanBuild, generateBuild));
 gulp.task("deploy", gulp.series("build", cleanDeploy, generateDeploy));
 gulp.task("archive", gulp.series("build", generateArchive));
+
+gulp.task("watch-deploy", gulp.series("deploy", watchDeploy));
