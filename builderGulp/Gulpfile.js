@@ -1,6 +1,8 @@
 const path = require('path'),
 	  gulp = require('gulp'),
 	  zip = require('gulp-zip'),
+	  log = require('fancy-log'),
+	  color = require('ansi-colors'),
 	  del = require('del'),
 	  fs = require('fs'),
 	  addonConfig = require('./config.js');
@@ -9,7 +11,7 @@ const buildFolderPATH = path.resolve(__dirname, addonConfig.buildFolder),
 	  deployFolderPATH = path.resolve(addonConfig.esoAddonDir, addonConfig.modName),
 	  archiveFolderPATH = path.resolve(__dirname, addonConfig.archiveFolder),
 	  sourceFiles = addonConfig.sourceFiles.map((str) => str.replace(/\//g, path.sep)),
-	  outputFolderBuild = path.resolve(buildFolderPATH, addonConfig.modName);
+	  outputBuildFolder = path.resolve(buildFolderPATH, addonConfig.modName);
 
 process.chdir(path.resolve(__dirname, "../"));
 
@@ -23,19 +25,23 @@ const cleanDeploy = () => del([
 
 const generateBuild = () => 
 	gulp.src(sourceFiles)
-		.pipe(gulp.dest(outputFolderBuild))
+		.pipe(gulp.dest(outputBuildFolder))
 ;
 
 const generateDeploy = () => 
-	gulp.src(outputFolderBuild + path.sep + "**")
+	gulp.src(outputBuildFolder + path.sep + "**")
 		.pipe(gulp.dest(deployFolderPATH))
 ;
 
-const generateArchive = (buildFolderPATH) =>  
-	gulp.src(outputFolderBuild + path.sep + "**")
+const generateArchive = () =>  
+	gulp.src(buildFolderPATH + path.sep + "**")
 		.pipe(zip(`${addonConfig.modName}_${getVersion()}.zip`))
 		.pipe(gulp.dest(archiveFolderPATH))
 ;
+
+function getFileContent(filename) {
+	return fs.readFileSync(filename).toString();
+}
 
 function getVersion() {
 	const txtFile = getFileContent(addonConfig.modName + ".txt");
@@ -61,8 +67,15 @@ function getVersion() {
 	return version;
 }
 
-function getFileContent(filename) {
-	return fs.readFileSync(filename).toString();
+function watchDeploy() {
+	const watcher = gulp.watch(sourceFiles);
+
+	watcher.on("change", function(path, stats) {
+		log(`Change detected '${color.cyan(path)}'`);
+		gulp.src(path)
+			.pipe(gulp.dest(outputBuildFolder))
+			.pipe(gulp.dest(deployFolderPATH));
+	});
 }
 
 gulp.task("clean", cleanBuild);
@@ -71,3 +84,5 @@ gulp.task("clean-deploy", cleanDeploy);
 gulp.task("build", gulp.series(cleanBuild, generateBuild));
 gulp.task("deploy", gulp.series("build", cleanDeploy, generateDeploy));
 gulp.task("archive", gulp.series("build", generateArchive));
+
+gulp.task("watch-deploy", gulp.series("deploy", watchDeploy));
