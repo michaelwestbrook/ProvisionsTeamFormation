@@ -73,6 +73,4 @@ local function TeamFormation_OnAddOnLoad(eventCode, addOnName)
 	end)
 end
 
-function TeamFormation_OnInitialized()
-	EVENT_MANAGER:RegisterForEvent(ProvTF.name, EVENT_ADD_ON_LOADED, function(...) TeamFormation_OnAddOnLoad(...) end)
-end
+EVENT_MANAGER:RegisterForEvent(ProvTF.name, EVENT_ADD_ON_LOADED, function(...) TeamFormation_OnAddOnLoad(...) end)
