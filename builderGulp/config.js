@@ -16,7 +16,6 @@ const addonConfig = {
         "ProvisionsTeamFormation.txt",
         "README.md",
         "TeamFormation.lua",
-        "TeamFormation.xml",
         "TF_low.jpg"
     ],
     filesWithVersionNumber: [
