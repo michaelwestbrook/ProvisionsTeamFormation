@@ -10,7 +10,6 @@ const addonConfig = {
     sourceFiles: [
         "function/**",
         "lang/**",
-        "libs/**",
         "Bindings.xml",
         "header.lua",
         "ProvisionsTeamFormation.txt",
