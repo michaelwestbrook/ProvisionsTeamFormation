@@ -87,6 +87,18 @@ function watchDeploy() {
 	});
 }
 
+function translateStrings() {
+	const translator = require('eso-azure-translate');
+	const apiKey = process.env["AzureTranslatorKey"] || addonConfig.AzureTranslatorKey;
+	if (!apiKey) {
+		throw "Must either set `AzureTranslatorKey` environment variable or `AzureTranslatorKey` property in config.js";
+	}
+
+	// Translated by Baertram - http://www.esoui.com/forums/showpost.php?p=21761&postcount=2
+	// Corrected spelling/Fixed grammar by Circonian
+	return translator.translateEnglishStrings(apiKey, require('./strings/en.json'), require('./strings/fr.json'), require('./strings/de.json'), './lang');
+}
+
 gulp.task("clean", cleanBuild);
 gulp.task("clean-deploy", cleanDeploy);
 
@@ -95,3 +107,4 @@ gulp.task("deploy", gulp.series("build", cleanDeploy, generateDeploy));
 gulp.task("archive", gulp.series("build", generateArchive));
 
 gulp.task("watch-deploy", gulp.series("deploy", watchDeploy));
+gulp.task("translate", translateStrings);
