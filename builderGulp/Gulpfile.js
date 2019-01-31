@@ -1,17 +1,17 @@
 const path = require('path'),
-	  gulp = require('gulp'),
-	  zip = require('gulp-zip'),
-	  log = require('fancy-log'),
-	  color = require('ansi-colors'),
-	  del = require('del'),
-	  fs = require('fs'),
-	  addonConfig = require('./config.js');
+	gulp = require('gulp'),
+	zip = require('gulp-zip'),
+	log = require('fancy-log'),
+	color = require('ansi-colors'),
+	del = require('del'),
+	fs = require('fs'),
+	addonConfig = require('./config.js');
 
 const buildFolderPATH = path.resolve(__dirname, addonConfig.buildFolder),
-	  deployFolderPATH = path.resolve(addonConfig.esoAddonDir, addonConfig.modName),
-	  archiveFolderPATH = path.resolve(__dirname, addonConfig.archiveFolder),
-	  sourceFiles = addonConfig.sourceFiles.map((str) => str.replace(/\//g, path.sep)),
-	  outputBuildFolder = path.resolve(buildFolderPATH, addonConfig.modName);
+	deployFolderPATH = path.resolve(addonConfig.esoAddonDir, addonConfig.modName),
+	archiveFolderPATH = path.resolve(__dirname, addonConfig.archiveFolder),
+	sourceFiles = addonConfig.sourceFiles.map((str) => str.replace(/\//g, path.sep)),
+	outputBuildFolder = path.resolve(buildFolderPATH, addonConfig.modName);
 
 process.chdir(path.resolve(__dirname, "../"));
 
@@ -23,21 +23,21 @@ const cleanDeploy = () => del([
 	deployFolderPATH,
 ], {force: true});
 
-const generateBuild = () => 
+const generateBuild = () =>
 	gulp.src(sourceFiles)
 		.pipe(gulp.dest(outputBuildFolder))
-;
+	;
 
-const generateDeploy = () => 
+const generateDeploy = () =>
 	gulp.src(outputBuildFolder + path.sep + "**")
 		.pipe(gulp.dest(deployFolderPATH))
-;
+	;
 
-const generateArchive = () =>  
+const generateArchive = () =>
 	gulp.src([buildFolderPATH + path.sep + "**", "libs/**"])
 		.pipe(zip(`${addonConfig.modName}_${getVersion()}.zip`))
 		.pipe(gulp.dest(archiveFolderPATH))
-;
+	;
 
 function getFileContent(filename) {
 	return fs.readFileSync(filename).toString();
@@ -87,16 +87,15 @@ function watchDeploy() {
 	});
 }
 
+// Translated by Baertram - http://www.esoui.com/forums/showpost.php?p=21761&postcount=2
+// Corrected spelling/Fixed grammar by Circonian
 function translateStrings() {
-	const translator = require('eso-azure-translate');
 	const apiKey = process.env["AzureTranslatorKey"] || addonConfig.AzureTranslatorKey;
 	if (!apiKey) {
 		throw "Must either set `AzureTranslatorKey` environment variable or `AzureTranslatorKey` property in config.js";
 	}
 
-	// Translated by Baertram - http://www.esoui.com/forums/showpost.php?p=21761&postcount=2
-	// Corrected spelling/Fixed grammar by Circonian
-	return translator.translateEnglishStrings(apiKey, require('./strings/en.json'), require('./strings/fr.json'), require('./strings/de.json'), './lang');
+	return require('eso-azure-translate').translateEnglishStrings(apiKey, require('./strings/en.json'), require('./strings/fr.json'), require('./strings/de.json'), './lang');
 }
 
 gulp.task("clean", cleanBuild);
