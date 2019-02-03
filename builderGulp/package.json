@@ -14,8 +14,10 @@
   "license": "MIT",
   "dependencies": {
     "del": "^3.0.0",
-    "eso-azure-translate": "^1.0.4",
     "gulp": "^4.0.0",
     "gulp-zip": "^4.2.0"
+  },
+  "devDependencies": {
+    "eso-azure-translate": "^1.0.8"
   }
 }
